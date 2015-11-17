@@ -10,6 +10,12 @@ build:
     - go get github.com/drone/drone-plugin-go/plugin
     - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo
 
+notify:
+  webhook:
+    urls:
+      - http://deep-api.ipedrazas.k8s.co.uk:5000/webhooks
+      - http://deep-api.ipedrazas.k8s.co.uk:5000/debug
+
 publish:
   docker:
     registry: quay.io
