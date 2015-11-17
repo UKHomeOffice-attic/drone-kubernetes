@@ -1,0 +1,29 @@
+{
+  "apiVersion": "v1",
+  "kind": "ReplicationController",
+  "metadata": {
+    "name": "nginxrc3",
+    "labels": {
+      "name": "nginxrc3"
+    }
+  },
+  "spec": {
+    "replicas": 1,
+    "template": {
+      "metadata": {
+        "name": "nginxrc3",
+        "labels": {
+          "name": "nginxrc3"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "nginxrc3",
+            "image": "nginx"
+          }
+        ]
+      }
+    }
+  }
+}
