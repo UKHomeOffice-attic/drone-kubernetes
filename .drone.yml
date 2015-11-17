@@ -7,6 +7,7 @@ build:
   environment:
     - GOPATH=/drone-kubernetes
   commands:
+    - go get github.com/drone/drone-plugin-go/plugin
     - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo
 
 notify:
