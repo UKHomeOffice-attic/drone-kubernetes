@@ -1,5 +1,5 @@
 # drone-kubernetes
-Kubernetes plugin for publishing kubernetes artifacts by [@ipedrazas](https://github.com/ipedrazas).
+Kubernetes plugin for publishing kubernetes artifacts from [drone](https://drone.io/)
 
 ## Overview
 
@@ -64,4 +64,20 @@ deploy:
     namespace: default
     webhook: $$WEBHOOK_URL
     webhook_token: $$WEBHOOK_TOKEN
+```
+
+The webhook will post a json with the following structure:
+
+```
+{
+    "Timestamp": 1447753701,
+    "Images": [
+        "kubernetes/rc.json"
+    ],
+    "Namespace": "default",
+    "Source": "DRONE",
+    "Target": "API_SERVER",
+    "Url": "WEBOHOOK",
+    "Token": "TOKEN"
+}
 ```
