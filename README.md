@@ -13,11 +13,15 @@ sh ./drone-kubernetes <<EOF
         "services": [],
         "apiserver": "https://127.0.0.1",
         "namespace": "default",
-        "token": "eyJhbGciOiJSUz..."
+        "token": "eyJhbGciOiJSUz...",
+        "webhook": "https://webhook-gateway.test/drone-deploys
+        "webhook_token": "12345abcdf"
+
     }
 }
 EOF
 ```
+
 
 ## Docker
 
@@ -32,7 +36,7 @@ docker build --rm=true -t plugins/drone-kubernetes .
 Deploy to kubernetes:
 
 ```
-docker run -i -v $(pwd):/drone/src ipedrazas/drone-kubernetes <<EOF
+docker run -i -v $(pwd):/drone/src quay.io/ukhomeofficedigital/drone-kubernetes <<EOF
 {
     "vargs": {
         "replicationcontrollers": [ "example/nginx.json" ],
@@ -40,7 +44,24 @@ docker run -i -v $(pwd):/drone/src ipedrazas/drone-kubernetes <<EOF
         "apiserver": "https://127.0.0.1",
         "namespace": "default",
         "token": "eyJhbGciOiJSUz..."
+        "webhook": "https://webhook-gateway.test/drone-deploys
+        "webhook_token": "12345abcdf"
     }
 }
 EOF
+```
+
+In your `.drone.yml` you will need to add the following
+
+```
+deploy:
+  kubernetes:
+    image: quay.io/ukhomeofficedigital/drone-kubernetes
+    replicationcontrollers: ["kubernetes/deep-api-rc.json", "kubernetes/deep-web-rc.json"]
+    services: []
+    token: $$TOKEN
+    apiserver: $$APISERVER
+    namespace: default
+    webhook: $$WEBHOOK_URL
+    webhook_token: $$WEBHOOK_TOKEN
 ```
