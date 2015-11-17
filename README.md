@@ -1,4 +1,4 @@
-# drone-webhook
+# drone-kubernetes
 Kubernetes plugin for publishing kubernetes artifacts by [@ipedrazas](https://github.com/ipedrazas).
 
 ## Overview
