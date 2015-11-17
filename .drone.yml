@@ -19,6 +19,7 @@ notify:
 
 publish:
   docker:
+    registry: quay.io
     environment:
       - DOCKER_LAUNCH_DEBUG=true
     username: $$QUAY_USER
