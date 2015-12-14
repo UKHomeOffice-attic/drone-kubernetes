@@ -240,14 +240,16 @@ func main() {
 		}
 		createArtifact(artifact, vargs.Token)
 	}
-	wh := &WebHook{
-		Timestamp: makeTimestamp(),
-		Images:    deployments,
-		Namespace: vargs.Namespace,
-		Source:    vargs.Source,
-		Target:    vargs.ApiServer,
-		Url:       vargs.Webhook,
-		Token:     vargs.WebHookToken,
+	if vargs.Webhook != "" {
+		wh := &WebHook{
+			Timestamp: makeTimestamp(),
+			Images:    deployments,
+			Namespace: vargs.Namespace,
+			Source:    vargs.Source,
+			Target:    vargs.ApiServer,
+			Url:       vargs.Webhook,
+			Token:     vargs.WebHookToken,
+		}
+		sendWebhook(wh)
 	}
-	sendWebhook(wh)
 }
