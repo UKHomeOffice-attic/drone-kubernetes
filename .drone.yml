@@ -19,6 +19,7 @@ publish:
     password: $$QUAY_PASSWORD
     email: $$QUAY_EMAIL
     repo: quay.io/ukhomeofficedigital/drone-kubernetes
+    storage_driver: vfs
     tag:
       - latest
       - "$$BUILD_NUMBER"
