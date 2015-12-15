@@ -10,83 +10,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"strconv"
 	"strings"
 	"time"
 )
 
 var debug bool
-
-type WebHook struct {
-	Timestamp int64
-	Images    []string
-	Namespace string
-	Source    string
-	Target    string
-	Url       string
-	Token     string
-}
-
-type ReqEnvelope struct {
-	Verb  string
-	Token string
-	Json  []byte
-	Url   string
-}
-
-type Artifact struct {
-	ApiVersion string
-	Kind       string
-	Data       []byte
-	Metadata   struct {
-		Name string
-	}
-	Url string
-}
-
-func zeroReplicas(artifact Artifact, token string) (bool, error) {
-
-	json := `{"spec": {"replicas": 0}}`
-	req := ReqEnvelope{
-		Verb:  "PATCH",
-		Token: token,
-		Url:   fmt.Sprintf("%s/%s", artifact.Url, artifact.Metadata.Name),
-		Json:  []byte(json),
-	}
-	res, err := doRequest(req)
-	if err != nil {
-		log.Panic("%s", err)
-	}
-	time.Sleep(time.Second * 5)
-	return res, err
-}
-
-func deleteArtifact(artifact Artifact, token string) (bool, error) {
-	if strings.Contains(artifact.Kind, "ReplicationController") {
-		res, e := zeroReplicas(artifact, token)
-		if e != nil {
-			log.Panic("%s", e)
-			os.Exit(1)
-		}
-		if res {
-			if debug {
-				log.Println("Replicas set to Zero")
-			}
-		}
-	}
-
-	url := fmt.Sprintf("%s/%s", artifact.Url, artifact.Metadata.Name)
-	if debug {
-		log.Println(url)
-	}
-	param := ReqEnvelope{
-		Url:   url,
-		Token: token,
-		Verb:  "DELETE",
-	}
-	return doRequest(param)
-}
 
 func doRequest(param ReqEnvelope) (bool, error) {
 	tr := &http.Transport{
@@ -119,14 +47,13 @@ func doRequest(param ReqEnvelope) (bool, error) {
 	if debug {
 		contents, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			os.Exit(1)
+			log.Fatal(err)
 		}
 		log.Printf("%s\n", string(contents))
 	}
 
 	if err != nil {
-		log.Panic("%s", err)
-		os.Exit(1)
+		log.Fatal(err)
 	} else {
 		defer response.Body.Close()
 
@@ -137,36 +64,11 @@ func doRequest(param ReqEnvelope) (bool, error) {
 	return false, err
 }
 
-func existsArtifact(artifact Artifact, token string) (bool, error) {
-	aUrl := fmt.Sprintf("%s/%s", artifact.Url, artifact.Metadata.Name)
-
-	req := ReqEnvelope{
-		Url:   aUrl,
-		Token: token,
-		Verb:  "GET",
-	}
-	return doRequest(req)
-
-}
-
-func createArtifact(artifact Artifact, token string) {
-	deployments = append(deployments, artifact.Metadata.Name)
-	param := ReqEnvelope{
-		Url:   artifact.Url,
-		Token: token,
-		Json:  artifact.Data,
-		Verb:  "POST",
-	}
-	doRequest(param)
-
-}
-
 func readArtifactFromFile(workspace string, artifactFile string, apiserver string, namespace string) (Artifact, error) {
 	artifactFilename := workspace + "/" + artifactFile
 	file, err := ioutil.ReadFile(artifactFilename)
 	if err != nil {
-		log.Panic(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	artifact := Artifact{}
 	if strings.HasSuffix(artifactFilename, ".yaml") {
@@ -174,13 +76,11 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 		err = yaml.Unmarshal(file, &data)
 		data, err = transformData(data)
 		if err != nil {
-			log.Panic(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 		file, err = json.Marshal(data)
 		if err != nil {
-			log.Panic(err)
-			os.Exit(1)
+			log.Fatal(err)
 		}
 
 	}
@@ -220,45 +120,6 @@ func sendWebhook(wh *WebHook) {
 
 var deployments []string
 
-func transformData(in interface{}) (out interface{}, err error) {
-	switch in.(type) {
-	case map[interface{}]interface{}:
-		o := make(map[string]interface{})
-		for k, v := range in.(map[interface{}]interface{}) {
-			sk := ""
-			switch k.(type) {
-			case string:
-				sk = k.(string)
-			case int:
-				sk = strconv.Itoa(k.(int))
-			default:
-				log.Panic("%s", err)
-				os.Exit(1)
-			}
-			v, err = transformData(v)
-			if err != nil {
-				return nil, err
-			}
-			o[sk] = v
-		}
-		return o, nil
-	case []interface{}:
-		in1 := in.([]interface{})
-		len1 := len(in1)
-		o := make([]interface{}, len1)
-		for i := 0; i < len1; i++ {
-			o[i], err = transformData(in1[i])
-			if err != nil {
-				return nil, err
-			}
-		}
-		return o, nil
-	default:
-		return in, nil
-	}
-	return in, nil
-}
-
 func main() {
 	var vargs = struct {
 		ReplicationControllers []string `json:replicationcontrollers`
@@ -281,8 +142,7 @@ func main() {
 	for _, rc := range vargs.ReplicationControllers {
 		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace)
 		if err != nil {
-			log.Panic(err)
-			return
+			log.Fatal(err)
 		}
 		if b, _ := existsArtifact(artifact, vargs.Token); b {
 			deleteArtifact(artifact, vargs.Token)
@@ -293,8 +153,7 @@ func main() {
 	for _, rc := range vargs.Services {
 		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace)
 		if err != nil {
-			log.Panic(err)
-			return
+			log.Fatal(err)
 		}
 		createArtifact(artifact, vargs.Token)
 	}
