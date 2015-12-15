@@ -10,20 +10,20 @@ build:
     - go get github.com/drone/drone-plugin-go/plugin
     - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo
 
-# publish:
-#   docker:
-#     registry: quay.io
-#     environment:
-#       - DOCKER_LAUNCH_DEBUG=true
-#     username: $$QUAY_USER
-#     password: $$QUAY_PASSWORD
-#     email: $$QUAY_EMAIL
-#     repo: quay.io/ukhomeofficedigital/drone-kubernetes
-#     tag:
-#       - latest
-#       - "$$BUILD_NUMBER"
-#     when:
-#       branch: master
+publish:
+  docker:
+    registry: quay.io
+    environment:
+      - DOCKER_LAUNCH_DEBUG=true
+    username: $$QUAY_USER
+    password: $$QUAY_PASSWORD
+    email: $$QUAY_EMAIL
+    repo: quay.io/ukhomeofficedigital/drone-kubernetes
+    tag:
+      - latest
+      - "$$BUILD_NUMBER"
+    when:
+      branch: master
 
-#     branch: master
+    branch: master
 
