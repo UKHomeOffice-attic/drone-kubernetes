@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/drone/drone-plugin-go/plugin"
+	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -160,15 +162,32 @@ func createArtifact(artifact Artifact, token string) {
 }
 
 func readArtifactFromFile(workspace string, artifactFile string, apiserver string, namespace string) (Artifact, error) {
-	file, e := ioutil.ReadFile(workspace + "/" + artifactFile)
-	// fmt.Println(string(file))
-	if e != nil {
-		log.Panic(e)
+	artifactFilename := workspace + "/" + artifactFile
+	file, err := ioutil.ReadFile(artifactFilename)
+	if err != nil {
+		log.Panic(err)
 		os.Exit(1)
 	}
 	artifact := Artifact{}
+	if strings.HasSuffix(artifactFilename, ".yaml") {
+		var data interface{}
+		err = yaml.Unmarshal(file, &data)
+		data, err = transformData(data)
+		if err != nil {
+			log.Panic(err)
+			os.Exit(1)
+		}
+		file, err = json.Marshal(data)
+		if err != nil {
+			log.Panic(err)
+			os.Exit(1)
+		}
+
+	}
+
 	json.Unmarshal(file, &artifact)
 	artifact.Data = file
+
 	if artifact.Kind == "ReplicationController" {
 		artifact.Url = fmt.Sprintf("%s/api/v1/namespaces/%s/replicationcontrollers", apiserver, namespace)
 	}
@@ -176,7 +195,7 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 		artifact.Url = fmt.Sprintf("%s/api/v1/namespaces/%s/services", apiserver, namespace)
 	}
 
-	return artifact, e
+	return artifact, err
 }
 
 func makeTimestamp() int64 {
@@ -200,6 +219,45 @@ func sendWebhook(wh *WebHook) {
 }
 
 var deployments []string
+
+func transformData(in interface{}) (out interface{}, err error) {
+	switch in.(type) {
+	case map[interface{}]interface{}:
+		o := make(map[string]interface{})
+		for k, v := range in.(map[interface{}]interface{}) {
+			sk := ""
+			switch k.(type) {
+			case string:
+				sk = k.(string)
+			case int:
+				sk = strconv.Itoa(k.(int))
+			default:
+				log.Panic("%s", err)
+				os.Exit(1)
+			}
+			v, err = transformData(v)
+			if err != nil {
+				return nil, err
+			}
+			o[sk] = v
+		}
+		return o, nil
+	case []interface{}:
+		in1 := in.([]interface{})
+		len1 := len(in1)
+		o := make([]interface{}, len1)
+		for i := 0; i < len1; i++ {
+			o[i], err = transformData(in1[i])
+			if err != nil {
+				return nil, err
+			}
+		}
+		return o, nil
+	default:
+		return in, nil
+	}
+	return in, nil
+}
 
 func main() {
 	var vargs = struct {
