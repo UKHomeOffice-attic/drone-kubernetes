@@ -12,8 +12,8 @@ The following is a sample Kubernetes configuration in your .drone.yml file:
 publish:
   kubernetes:
     replicationcontrollers:
-        - kubernetes/nginx-rc.json
-        - kubernetes/nginx-svc.json
+        - kubernetes/nginx-rc.yaml
+        - kubernetes/nginx.json
     services:
     apiserver: https://127.0.0.1
     namespace: default
