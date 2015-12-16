@@ -144,7 +144,3 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 
 	return artifact, err
 }
-
-func makeTimestamp() int64 {
-	return time.Now().UnixNano() / int64(time.Millisecond)
-}

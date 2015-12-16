@@ -12,7 +12,7 @@ spec:
         name: nginx
     spec:
       containers:
-      - image: nginx:{{ .Build_id }}
+      - image: nginx:{{ .TAG }}
         name: nginx
         ports:
         - name: nginx
