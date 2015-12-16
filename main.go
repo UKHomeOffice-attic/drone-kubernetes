@@ -133,7 +133,9 @@ func main() {
 	plugin.Param("workspace", &workspace)
 	plugin.Param("vargs", &vargs)
 	plugin.Parse()
-	debug = vargs.Debug
+	if vargs.Debug == "true" {
+		debug = true
+	}
 
 	// Iterate over rcs and svcs
 	for _, rc := range vargs.ReplicationControllers {
