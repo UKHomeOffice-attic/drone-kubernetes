@@ -1,13 +1,25 @@
 package main
 
-type WebHook struct {
-	Timestamp int64
-	Images    []string
-	Namespace string
-	Source    string
-	Target    string
-	Url       string
-	Token     string
+import (
+	"github.com/drone/drone-go/drone"
+)
+
+type Params struct {
+	Services               []string `json:services`
+	ApiServer              string   `json:apiserver`
+	Token                  string   `json:token`
+	Namespace              string   `json:namespace`
+	Debug                  string   `json:debug`
+	Source                 string   `json:source`
+	Tag                    string   `json:tag`
+	ReplicationControllers []string `json:replicationcontrollers`
+}
+
+type Context struct {
+	System drone.System
+	Repo   drone.Repo
+	Build  drone.Build
+	Vargs  Params
 }
 
 type ReqEnvelope struct {

@@ -5,7 +5,8 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/drone/drone-plugin-go/plugin"
+	"github.com/drone/drone-go/drone"
+	"github.com/drone/drone-go/plugin"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,7 +15,58 @@ import (
 )
 
 var debug bool
-var build = plugin.Build{}
+var deployments []string
+
+func main() {
+
+	system := drone.System{}
+	repo := drone.Repo{}
+	build := drone.Build{}
+	vargs := Params{}
+	workspace := drone.Workspace{}
+
+	plugin.Param("system", &system)
+	plugin.Param("workspace", &workspace)
+	plugin.Param("repo", &repo)
+	plugin.Param("build", &build)
+	plugin.Param("vargs", &vargs)
+	plugin.MustParse()
+
+	debug = true
+	if vargs.Debug == "true" {
+		debug = true
+	}
+
+	if debug {
+		log.Println("Workspace Root: " + workspace.Root)
+		log.Println("Workspace Path: " + workspace.Path)
+
+		log.Println("Tag: " + vargs.Tag)
+	}
+
+	// Iterate over rcs and svcs
+	for _, rc := range vargs.ReplicationControllers {
+		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace, vargs.Tag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if debug {
+			log.Println("Artifact loaded: " + artifact.Url)
+		}
+		if b, _ := existsArtifact(artifact, vargs.Token); b {
+			deleteArtifact(artifact, vargs.Token)
+			time.Sleep(time.Second * 5)
+		}
+		createArtifact(artifact, vargs.Token)
+	}
+	for _, rc := range vargs.Services {
+		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace, vargs.Tag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		createArtifact(artifact, vargs.Token)
+	}
+}
 
 func doRequest(param ReqEnvelope) (bool, error) {
 	if debug {
@@ -96,88 +148,4 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 
 func makeTimestamp() int64 {
 	return time.Now().UnixNano() / int64(time.Millisecond)
-}
-
-func sendWebhook(wh *WebHook) {
-
-	jwh, err := json.Marshal(wh)
-	if err != nil {
-		log.Panic(err)
-		return
-	}
-	req := ReqEnvelope{
-		Verb:  "POST",
-		Token: wh.Token,
-		Url:   wh.Url,
-		Json:  []byte(jwh),
-	}
-	doRequest(req)
-}
-
-var deployments []string
-
-func main() {
-	var vargs = struct {
-		Services               []string `json:services`
-		ApiServer              string   `json:apiserver`
-		Token                  string   `json:token`
-		Namespace              string   `json:namespace`
-		Debug                  string   `json:debug`
-		Source                 string   `json:source`
-		Tag                    string   `json:tag`
-		ReplicationControllers []string `json:replicationcontrollers`
-	}{}
-
-	workspace := plugin.Workspace{}
-
-	plugin.Param("workspace", &workspace)
-	plugin.Param("vargs", &vargs)
-	plugin.Param("build", &build)
-	plugin.Parse()
-	debug = true
-	if vargs.Debug == "true" {
-		debug = true
-	}
-
-	if debug {
-		log.Println("Workspace Root: " + workspace.Root)
-		log.Println("Workspace Path: " + workspace.Path)
-
-		log.Println("Build Number: " + vargs.Tag)
-	}
-
-	// Iterate over rcs and svcs
-	for _, rc := range vargs.ReplicationControllers {
-		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace, vargs.Tag)
-		if err != nil {
-			log.Fatal(err)
-		}
-		if debug {
-			log.Println("Artifact loaded: " + artifact.Url)
-		}
-		if b, _ := existsArtifact(artifact, vargs.Token); b {
-			deleteArtifact(artifact, vargs.Token)
-			time.Sleep(time.Second * 5)
-		}
-		createArtifact(artifact, vargs.Token)
-	}
-	for _, rc := range vargs.Services {
-		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace, vargs.Tag)
-		if err != nil {
-			log.Fatal(err)
-		}
-		createArtifact(artifact, vargs.Token)
-	}
-	// if vargs.Webhook != "" {
-	// 	wh := &WebHook{
-	// 		Timestamp: makeTimestamp(),
-	// 		Images:    deployments,
-	// 		Namespace: vargs.Namespace,
-	// 		Source:    vargs.Source,
-	// 		Target:    vargs.ApiServer,
-	// 		Url:       vargs.Webhook,
-	// 		Token:     vargs.WebHookToken,
-	// 	}
-	// 	sendWebhook(wh)
-	// }
 }
