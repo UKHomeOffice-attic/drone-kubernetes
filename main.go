@@ -67,7 +67,7 @@ func doRequest(param ReqEnvelope) (bool, error) {
 	return false, err
 }
 
-func readArtifactFromFile(workspace string, artifactFile string, apiserver string, namespace string) (Artifact, error) {
+func readArtifactFromFile(workspace string, artifactFile string, apiserver string, namespace string, tag string) (Artifact, error) {
 	artifactFilename := workspace + "/" + artifactFile
 	if debug {
 		log.Println("readArtifactFromFile " + artifactFilename)
@@ -78,7 +78,7 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 	}
 	artifact := Artifact{}
 	if strings.HasSuffix(artifactFilename, ".yaml") {
-		file = yaml2Json(file, string(build.Number))
+		file = yaml2Json(file, tag)
 	}
 
 	json.Unmarshal(file, &artifact)
@@ -118,13 +118,14 @@ var deployments []string
 
 func main() {
 	var vargs = struct {
-		ReplicationControllers []string `json:replicationcontrollers`
 		Services               []string `json:services`
 		ApiServer              string   `json:apiserver`
 		Token                  string   `json:token`
 		Namespace              string   `json:namespace`
 		Debug                  string   `json:debug`
 		Source                 string   `json:source`
+		Tag                    string   `json:tag`
+		ReplicationControllers []string `json:replicationcontrollers`
 	}{}
 
 	workspace := plugin.Workspace{}
@@ -142,12 +143,12 @@ func main() {
 		log.Println("Workspace Root: " + workspace.Root)
 		log.Println("Workspace Path: " + workspace.Path)
 
-		log.Println("Build Number: " + string(build.Number))
+		log.Println("Build Number: " + vargs.Tag)
 	}
 
 	// Iterate over rcs and svcs
 	for _, rc := range vargs.ReplicationControllers {
-		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace)
+		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace, vargs.Tag)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -161,7 +162,7 @@ func main() {
 		createArtifact(artifact, vargs.Token)
 	}
 	for _, rc := range vargs.Services {
-		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace)
+		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace, vargs.Tag)
 		if err != nil {
 			log.Fatal(err)
 		}

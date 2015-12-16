@@ -47,14 +47,14 @@ func transformData(in interface{}) (out interface{}, err error) {
 	return in, nil
 }
 
-func yaml2Json(file []byte, buildNumber string) []byte {
+func yaml2Json(file []byte, tag string) []byte {
 
 	var data interface{}
 
 	t := template.New("artifact")
 	t, _ = t.Parse(string(file))
 	yamdata := new(bytes.Buffer)
-	ddata := DroneData{BUILD_NUMBER: buildNumber}
+	ddata := DroneData{TAG: tag}
 	t.Execute(yamdata, ddata)
 	err := yaml.Unmarshal(yamdata.Bytes(), &data)
 

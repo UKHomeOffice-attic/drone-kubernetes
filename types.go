@@ -28,5 +28,5 @@ type Artifact struct {
 }
 
 type DroneData struct {
-	BUILD_NUMBER string
+	TAG string
 }
