@@ -78,7 +78,7 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 	}
 	artifact := Artifact{}
 	if strings.HasSuffix(artifactFilename, ".yaml") {
-		file = yaml2Json(file)
+		file = yaml2Json(file, string(build.Number))
 	}
 
 	json.Unmarshal(file, &artifact)
