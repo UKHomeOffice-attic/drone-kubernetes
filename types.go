@@ -9,7 +9,7 @@ type Params struct {
 	ApiServer              string   `json:apiserver`
 	Token                  string   `json:token`
 	Namespace              string   `json:namespace`
-	Debug                  string   `json:debug`
+	Debug                  bool     `json:debug`
 	Source                 string   `json:source`
 	Tag                    string   `json:tag`
 	ReplicationControllers []string `json:replicationcontrollers`
