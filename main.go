@@ -133,6 +133,7 @@ func main() {
 	plugin.Param("workspace", &workspace)
 	plugin.Param("vargs", &vargs)
 	plugin.Parse()
+	debug = true
 	if vargs.Debug == "true" {
 		debug = true
 	}
