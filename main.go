@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -138,6 +139,11 @@ func main() {
 	if debug {
 		log.Println("Workspace Root: " + workspace.Root)
 		log.Println("Workspace Path: " + workspace.Path)
+
+		for _, e := range os.Environ() {
+			pair := strings.Split(e, "=")
+			log.Println(pair[0])
+		}
 	}
 
 	// Iterate over rcs and svcs
