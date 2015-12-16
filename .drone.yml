@@ -7,7 +7,8 @@ build:
   environment:
     - GOPATH=/drone-kubernetes
   commands:
-    - go get github.com/drone/drone-plugin-go/plugin
+    - go get github.com/drone/drone-go/drone
+    - go get github.com/drone/drone-go/plugin
     - go get gopkg.in/yaml.v2
     - go get github.com/stretchr/testify/assert
     - go test
