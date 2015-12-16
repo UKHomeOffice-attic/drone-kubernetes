@@ -26,3 +26,7 @@ type Artifact struct {
 	}
 	Url string
 }
+
+type DroneData struct {
+	BUILD_NUMBER string
+}

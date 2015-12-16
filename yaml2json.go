@@ -1,8 +1,13 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"gopkg.in/yaml.v2"
 	"log"
+	"os"
 	"strconv"
+	"text/template"
 )
 
 func transformData(in interface{}) (out interface{}, err error) {
@@ -41,4 +46,37 @@ func transformData(in interface{}) (out interface{}, err error) {
 		return in, nil
 	}
 	return in, nil
+}
+
+func yaml2Json(file []byte) []byte {
+
+	var data interface{}
+
+	t := template.New("artifact")
+	t, _ = t.Parse(string(file))
+	yamdata := new(bytes.Buffer)
+	build := os.Getenv("BUILD_NUMBER")
+	ddata := DroneData{BUILD_NUMBER: build}
+	t.Execute(yamdata, ddata)
+	err := yaml.Unmarshal(yamdata.Bytes(), &data)
+
+	data, err = transformData(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	file, err = json.Marshal(data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if string(file) != "null" {
+		return file
+	} else {
+		return nil
+	}
+}
+
+func isJSON(s string) bool {
+	var js map[string]interface{}
+	return json.Unmarshal([]byte(s), &js) == nil
+
 }
