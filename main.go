@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/drone/drone-plugin-go/plugin"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -72,16 +71,7 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 	}
 	artifact := Artifact{}
 	if strings.HasSuffix(artifactFilename, ".yaml") {
-		var data interface{}
-		err = yaml.Unmarshal(file, &data)
-		data, err = transformData(data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		file, err = json.Marshal(data)
-		if err != nil {
-			log.Fatal(err)
-		}
+		file = yaml2Json(file)
 
 	}
 

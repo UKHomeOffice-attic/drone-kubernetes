@@ -9,6 +9,8 @@ build:
   commands:
     - go get github.com/drone/drone-plugin-go/plugin
     - go get gopkg.in/yaml.v2
+    - go get github.com/stretchr/testify/assert
+    - go test
     - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo
 
 publish:
