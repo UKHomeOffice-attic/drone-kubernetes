@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"gopkg.in/yaml.v2"
 	"log"
-	"os"
 	"strconv"
 	"text/template"
 )
@@ -55,8 +54,7 @@ func yaml2Json(file []byte) []byte {
 	t := template.New("artifact")
 	t, _ = t.Parse(string(file))
 	yamdata := new(bytes.Buffer)
-	build := os.Getenv("BUILD_NUMBER")
-	ddata := DroneData{BUILD_NUMBER: build}
+	ddata := DroneData{BUILD_NUMBER: string(build.Number)}
 	t.Execute(yamdata, ddata)
 	err := yaml.Unmarshal(yamdata.Bytes(), &data)
 

@@ -9,12 +9,12 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 )
 
 var debug bool
+var build = plugin.Build{}
 
 func doRequest(param ReqEnvelope) (bool, error) {
 	if debug {
@@ -128,8 +128,10 @@ func main() {
 	}{}
 
 	workspace := plugin.Workspace{}
+
 	plugin.Param("workspace", &workspace)
 	plugin.Param("vargs", &vargs)
+	plugin.Param("build", &build)
 	plugin.Parse()
 	debug = true
 	if vargs.Debug == "true" {
@@ -140,10 +142,7 @@ func main() {
 		log.Println("Workspace Root: " + workspace.Root)
 		log.Println("Workspace Path: " + workspace.Path)
 
-		for _, e := range os.Environ() {
-			pair := strings.Split(e, "=")
-			log.Println(pair[0])
-		}
+		log.Println("Build Number: " + string(build.Number))
 	}
 
 	// Iterate over rcs and svcs
