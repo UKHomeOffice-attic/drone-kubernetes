@@ -78,7 +78,6 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 	artifact := Artifact{}
 	if strings.HasSuffix(artifactFilename, ".yaml") {
 		file = yaml2Json(file)
-
 	}
 
 	json.Unmarshal(file, &artifact)
@@ -124,9 +123,7 @@ func main() {
 		Token                  string   `json:token`
 		Namespace              string   `json:namespace`
 		Debug                  string   `json:debug`
-		Webhook                string   `json:webhook`
 		Source                 string   `json:source`
-		WebHookToken           string   `json:webhook_token`
 	}{}
 
 	workspace := plugin.Workspace{}
@@ -136,6 +133,11 @@ func main() {
 	debug = true
 	if vargs.Debug == "true" {
 		debug = true
+	}
+
+	if debug {
+		log.Println("Workspace Root: " + workspace.Root)
+		log.Println("Workspace Path: " + workspace.Path)
 	}
 
 	// Iterate over rcs and svcs
