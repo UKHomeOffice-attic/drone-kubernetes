@@ -16,6 +16,9 @@ import (
 var debug bool
 
 func doRequest(param ReqEnvelope) (bool, error) {
+	if debug {
+		log.Println("doRequest ")
+	}
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -65,6 +68,9 @@ func doRequest(param ReqEnvelope) (bool, error) {
 
 func readArtifactFromFile(workspace string, artifactFile string, apiserver string, namespace string) (Artifact, error) {
 	artifactFilename := workspace + "/" + artifactFile
+	if debug {
+		log.Println("readArtifactFromFile " + artifactFilename)
+	}
 	file, err := ioutil.ReadFile(artifactFilename)
 	if err != nil {
 		log.Fatal(err)
@@ -127,12 +133,16 @@ func main() {
 	plugin.Param("workspace", &workspace)
 	plugin.Param("vargs", &vargs)
 	plugin.Parse()
+	debug = vargs.Debug
 
 	// Iterate over rcs and svcs
 	for _, rc := range vargs.ReplicationControllers {
 		artifact, err := readArtifactFromFile(workspace.Path, rc, vargs.ApiServer, vargs.Namespace)
 		if err != nil {
 			log.Fatal(err)
+		}
+		if debug {
+			log.Println("Artifact loaded: " + artifact.Url)
 		}
 		if b, _ := existsArtifact(artifact, vargs.Token); b {
 			deleteArtifact(artifact, vargs.Token)

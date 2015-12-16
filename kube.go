@@ -8,7 +8,9 @@ import (
 )
 
 func zeroReplicas(artifact Artifact, token string) (bool, error) {
-
+	if debug {
+		log.Println("zeroReplicas")
+	}
 	json := `{"spec": {"replicas": 0}}`
 	req := ReqEnvelope{
 		Verb:  "PATCH",
@@ -25,6 +27,9 @@ func zeroReplicas(artifact Artifact, token string) (bool, error) {
 }
 
 func deleteArtifact(artifact Artifact, token string) (bool, error) {
+	if debug {
+		log.Println("deleteArtifact")
+	}
 	if strings.Contains(artifact.Kind, "ReplicationController") {
 		res, err := zeroReplicas(artifact, token)
 		if err != nil {
@@ -51,7 +56,9 @@ func deleteArtifact(artifact Artifact, token string) (bool, error) {
 
 func existsArtifact(artifact Artifact, token string) (bool, error) {
 	aUrl := fmt.Sprintf("%s/%s", artifact.Url, artifact.Metadata.Name)
-
+	if debug {
+		log.Println("existsArtifact " + aUrl)
+	}
 	req := ReqEnvelope{
 		Url:   aUrl,
 		Token: token,
@@ -62,6 +69,9 @@ func existsArtifact(artifact Artifact, token string) (bool, error) {
 }
 
 func createArtifact(artifact Artifact, token string) {
+	if debug {
+		log.Println("createArtifact ")
+	}
 	deployments = append(deployments, artifact.Metadata.Name)
 	param := ReqEnvelope{
 		Url:   artifact.Url,
