@@ -147,16 +147,16 @@ func main() {
 		}
 		createArtifact(artifact, vargs.Token)
 	}
-	if vargs.Webhook != "" {
-		wh := &WebHook{
-			Timestamp: makeTimestamp(),
-			Images:    deployments,
-			Namespace: vargs.Namespace,
-			Source:    vargs.Source,
-			Target:    vargs.ApiServer,
-			Url:       vargs.Webhook,
-			Token:     vargs.WebHookToken,
-		}
-		sendWebhook(wh)
-	}
+	// if vargs.Webhook != "" {
+	// 	wh := &WebHook{
+	// 		Timestamp: makeTimestamp(),
+	// 		Images:    deployments,
+	// 		Namespace: vargs.Namespace,
+	// 		Source:    vargs.Source,
+	// 		Target:    vargs.ApiServer,
+	// 		Url:       vargs.Webhook,
+	// 		Token:     vargs.WebHookToken,
+	// 	}
+	// 	sendWebhook(wh)
+	// }
 }
