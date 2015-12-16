@@ -32,8 +32,7 @@ func main() {
 	plugin.Param("vargs", &vargs)
 	plugin.MustParse()
 
-	debug = true
-	if vargs.Debug == "true" {
+	if vargs.Debug {
 		debug = true
 	}
 
