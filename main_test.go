@@ -44,3 +44,17 @@ func TestYaml2Json(t *testing.T) {
 	file = yaml2Json(yamlFile, "23")
 	assert.True(t, isJSON(string(file)), "Variables are resolved, json is well formed")
 }
+
+func TestReadArtifactFromFile(t *testing.T) {
+
+	workspace := "."
+	artifactFile := "example/simple-test.yaml"
+	apiserver := "http://localhost"
+	namespace := "default"
+	tag := "testing"
+
+	artifact, err := readArtifactFromFile(workspace, artifactFile, apiserver, namespace, tag)
+	assert.Nil(t, err, "Artifact read from file")
+	assert.NotNil(t, artifact, "Artifact read from file")
+	assert.True(t, artifact.Kind == "ReplicationController", "Artifact read from file")
+}
