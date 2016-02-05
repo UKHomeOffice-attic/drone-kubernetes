@@ -14,6 +14,8 @@ publish:
     replicationcontrollers:
         - kubernetes/nginx-rc.yaml
         - kubernetes/nginx.json
+    secrets:
+        - kubernetes/secrets.yaml
     services:
     apiserver: https://127.0.0.1
     namespace: default

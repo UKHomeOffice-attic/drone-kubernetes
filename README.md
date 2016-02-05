@@ -11,6 +11,7 @@ sh ./drone-kubernetes <<EOF
     "vargs": {
         "replicationcontrollers": [ "example/nginx.json" ],
         "services": [],
+        "secrets": ["examples/secrets.yaml"]
         "apiserver": "https://127.0.0.1",
         "namespace": "default",
         "token": "eyJhbGciOiJSUz...",
