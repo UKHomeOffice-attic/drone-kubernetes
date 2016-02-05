@@ -141,6 +141,8 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 	if artifact.Kind == "Service" {
 		artifact.Url = fmt.Sprintf("%s/api/v1/namespaces/%s/services", apiserver, namespace)
 	}
-
+	if artifact.Kind == "Secret" {
+		artifact.Url = fmt.Sprintf("%s/api/v1/namespaces/%s/secrets", apiserver, namespace)
+	}
 	return artifact, err
 }
