@@ -65,6 +65,17 @@ func main() {
 		}
 		createArtifact(artifact, vargs.Token)
 	}
+	for _, d := range vargs.Deployments {
+		artifact, err := readArtifactFromFile(workspace.Path, d, vargs.ApiServer, vargs.Namespace, vargs.Tag)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if b, _ := existsArtifact(artifact, vargs.Token); b {
+			updateArtifact(artifact, vargs.Token)
+		} else {
+			createArtifact(artifact, vargs.Token)
+		}
+	}
 }
 
 func doRequest(param ReqEnvelope) (bool, error) {
@@ -143,6 +154,9 @@ func readArtifactFromFile(workspace string, artifactFile string, apiserver strin
 	}
 	if artifact.Kind == "Secret" {
 		artifact.Url = fmt.Sprintf("%s/api/v1/namespaces/%s/secrets", apiserver, namespace)
+	}
+	if artifact.Kind == "Deployment" {
+		artifact.Url = fmt.Sprintf("%s/apis/extensions/v1beta1/namespaces/%s/deployments", apiserver, namespace)
 	}
 	return artifact, err
 }

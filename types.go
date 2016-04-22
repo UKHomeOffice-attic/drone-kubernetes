@@ -14,6 +14,7 @@ type Params struct {
 	Tag                    string   `json:tag`
 	ReplicationControllers []string `json:replicationcontrollers`
 	Secrets                []string `json:secrets`
+	Deployments            []string `json:deployments`
 }
 
 type Context struct {
