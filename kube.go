@@ -80,5 +80,18 @@ func createArtifact(artifact Artifact, token string) {
 		Verb:  "POST",
 	}
 	doRequest(param)
+}
 
+func updateArtifact(artifact Artifact, token string) {
+	if debug {
+		log.Println("updateArtifact ")
+	}
+	artifact.Url = fmt.Sprintf("%s/%s", artifact.Url, artifact.Metadata.Name)
+	param := ReqEnvelope{
+		Url:   artifact.Url,
+		Token: token,
+		Json:  artifact.Data,
+		Verb:  "PUT",
+	}
+	doRequest(param)
 }
